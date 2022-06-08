@@ -26,29 +26,17 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import SplashScreen from './src/SplashScreen';
 
 const App = () => {
   return (
     <SafeAreaView>
       <StatusBar barStyle="light-content" />
-      <View style={styles.mainContainer}>
-        <Text style={styles.splashscreen}>PhotoBook</Text>
-      </View>
+      <SplashScreen/>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  mainContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "white",
-    height: "100%",
-  },
-  splashscreen: {
-    fontSize: 50,
-    fontWeight: "bold",
-  },
-});
+const styles = StyleSheet.create({});
 
 export default App;
