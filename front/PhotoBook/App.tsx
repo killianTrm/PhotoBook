@@ -8,6 +8,7 @@
  * @format
  */
 
+import {NavigationContainer} from '@react-navigation/native';
 import React, {ReactNode, useEffect, useState} from 'react';
 import {
   SafeAreaView,
@@ -28,21 +29,28 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 import HomeScreen from './src/HomeScreen';
 import SplashScreen from './src/SplashScreen';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 
+const Stack = createNativeStackNavigator();
 const App = () => {
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     setTimeout(() => {
-      setIsLoading(false)
+      setIsLoading(false);
     }, 2000);
-  }, [])
-  return (
-    <SafeAreaView>
-      <StatusBar barStyle="light-content" />
-      {
-        isLoading ? <SplashScreen/> : <HomeScreen/>
-      }
-    </SafeAreaView>
+  }, []);
+  return isLoading ? (
+    <SplashScreen />
+  ) : (
+    <NavigationContainer>
+      <SafeAreaProvider>
+        <StatusBar barStyle="light-content" />
+        <Stack.Navigator>
+          <Stack.Screen name="Home" component={HomeScreen} />
+        </Stack.Navigator>
+      </SafeAreaProvider>
+    </NavigationContainer>
   );
 };
 
