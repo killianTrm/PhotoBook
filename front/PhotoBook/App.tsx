@@ -9,51 +9,52 @@
  */
 
 import {NavigationContainer} from '@react-navigation/native';
-import React, {ReactNode, useEffect, useState} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
-
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-import HomeScreen from './src/HomeScreen';
-import SplashScreen from './src/SplashScreen';
+import React, {useEffect, useState} from 'react';
+import {StatusBar, StyleSheet, View} from 'react-native';
+import SplashScreen from './src/screens/SplashScreen';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
+import HomeScreen from './src/screens/HomeScreen';
+import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
+import LoginScreen from './src/screens/LoginScreen';
+import { RootStackParamList } from './src/navigation';
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
+  console.log('setIsLoading: ', setIsLoading);
+  console.log('isLoading: ', isLoading);
+
+  const isConnected = false;
   useEffect(() => {
     setTimeout(() => {
       setIsLoading(false);
     }, 2000);
   }, []);
-  return isLoading ? (
-    <SplashScreen />
-  ) : (
-    <NavigationContainer>
-      <SafeAreaProvider>
+
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safeAreaView}>
         <StatusBar barStyle="light-content" />
-        <Stack.Navigator>
-          <Stack.Screen name="Home" component={HomeScreen} />
-        </Stack.Navigator>
-      </SafeAreaProvider>
-    </NavigationContainer>
+        {isLoading ? (
+          <SplashScreen />
+        ) : (
+          <NavigationContainer>
+            <Stack.Navigator initialRouteName={isConnected ? "Home" : "Login"}>
+              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="Login" component={LoginScreen} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        )}
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  safeAreaView: {
+    flex: 1,
+  },
+});
 
 export default App;
