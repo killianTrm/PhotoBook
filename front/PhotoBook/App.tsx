@@ -8,7 +8,7 @@
  * @format
  */
 
-import React, {ReactNode} from 'react';
+import React, {ReactNode, useEffect, useState} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -26,13 +26,22 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import HomeScreen from './src/HomeScreen';
 import SplashScreen from './src/SplashScreen';
 
 const App = () => {
+  const [isLoading, setIsLoading] = useState(true)
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 2000);
+  }, [])
   return (
     <SafeAreaView>
       <StatusBar barStyle="light-content" />
-      <SplashScreen/>
+      {
+        isLoading ? <SplashScreen/> : <HomeScreen/>
+      }
     </SafeAreaView>
   );
 };
