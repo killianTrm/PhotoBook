@@ -4,8 +4,15 @@ import { StyleSheet, Text, View } from "react-native";
 import { RootStackParamList } from "../navigation";
 import { useAppSelector } from "../redux/hooks";
 import { selectAuthentication } from "../redux/slices/authentication.slice";
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import WallScreen from "./WallScreen";
+import LegalScreen from "./LegalScreen";
+import SettingsScreen from "./SettingsScreen";
 
 type HomeProps = NativeStackScreenProps<RootStackParamList, 'Home' >;
+
+const Tab = createBottomTabNavigator();
+
 const HomeScreen = ({ navigation }: HomeProps) => {
   const authentication = useAppSelector(selectAuthentication);
   useLayoutEffect(() => {
@@ -14,9 +21,11 @@ const HomeScreen = ({ navigation }: HomeProps) => {
     }
   }, [authentication])
     return (
-        <View style={styles.mainContainer}>
-        <Text style={styles.homescreen}> Hello {authentication.user?.displayName}</Text>
-        </View>
+      <Tab.Navigator>
+        <Tab.Screen name="Wall" component={WallScreen} />
+        <Tab.Screen name="Legal" component={LegalScreen} />
+        <Tab.Screen name="Settings" component={SettingsScreen} />
+      </Tab.Navigator>
     );
   };
 

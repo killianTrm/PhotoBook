@@ -30,14 +30,14 @@ const LoginScreen = ({navigation}: LoginProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const onPress = () => {
-    console.log('coucou');
-
     (async () => {
       try {
         setIsLoading(true);
         const user = await api.connect({login, password});
         dispatch(connect(user));
-        navigation.navigate('Home');
+        navigation.navigate('Home', {
+          screen: 'Wall',
+        });
       } catch (err) {
         console.log('err: ', err);
         setErrorMsg('Bad login');

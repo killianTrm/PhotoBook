@@ -13,15 +13,17 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React, {useEffect, useState} from 'react';
 import {StatusBar, StyleSheet} from 'react-native';
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
-import {Provider} from 'react-redux';
+import {connect, Provider} from 'react-redux';
+import api from './src/api';
 import {RootStackParamList} from './src/navigation';
+import { useAppDispatch } from './src/redux/hooks';
 import {store} from './src/redux/store';
 import HomeScreen from './src/screens/HomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import SplashScreen from './src/screens/SplashScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
+const dispatch = useAppDispatch();
 const App = () => {
   return (
     <Provider store={store}>
@@ -36,9 +38,25 @@ const ReduxApp = () => {
   console.log('isLoading: ', isLoading);
 
   useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
+    (async () => {
+      try {
+        const user = await api.isConnected();
+        if(!user){
+          
+        }else {
+          dispatch(connect(user));
+        }
+        
+      } catch (error) {
+        console.log('error: ', error);
+        
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+    
+      
+
   }, []);
 
   return (
@@ -49,7 +67,11 @@ const ReduxApp = () => {
           <SplashScreen />
         ) : (
           <NavigationContainer>
-            <Stack.Navigator initialRouteName="Home">
+            <Stack.Navigator
+              initialRouteName="Home"
+              screenOptions={{
+                headerShown: false,
+              }}>
               <Stack.Screen name="Home" component={HomeScreen} />
               <Stack.Screen name="Login" component={LoginScreen} />
             </Stack.Navigator>
