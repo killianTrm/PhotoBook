@@ -1,55 +1,60 @@
-import {User} from './redux/slices/authentication.slice';
-import {sleep} from './utils';
+import {authFetch} from './fetch';
+import {Article} from './redux/slices/articles.slice';
+export const domain = 'http://localhost:3000';
+export const apiUrl = `${domain}/api`;
 
-export interface LoginForm {
-  // #region Properties (2)
+export class Api {
+  async addNewArticle(article: Article) {
+    const url = apiUrl + '/articles';
+    console.log('url: ', url);
 
-  login: string;
-  password: string;
-
-  // #endregion Properties (2)
-}
-
-class Api {
-  // #region Public Methods (2)
-
-  public async connect(loginForm: LoginForm): Promise<User> {
-    const response = await fetch('http://localhost:3000/api/connect', {
+    const response = await authFetch(url, {
       method: 'POST',
-      body: JSON.stringify(loginForm),
+      body: JSON.stringify(article),
       headers: {
         'Content-Type': 'application/json',
       },
     });
-    const status = response.status;
-    console.log('status: ', status);
-    if (status !== 200) {
-      throw new Error('oups...');
+    if (response.status !== 201) {
+      throw new Error("Impossible d'ajouter une image");
     }
-    const user: User = await response.json();
-    return user;
+    return await response.json();
+  }
+
+  async connect(email: string, password: string) {
+    return await fetch(apiUrl + '/auth/connect', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({email, password}),
+    });
   }
 
   async disconnect() {
-    fetch('http//localhost:3000/api/disconnect', {
+    return await fetch(apiUrl + '/auth/disconnect', {
       method: 'POST',
     });
   }
 
-  async isConnected(): Promise<User | undefined> {
-    const response = await fetch('http://localhost:3000/api/is-connected');
-    const status = response.status;
-    console.log('status: ', status);
-    if(status !== 200) {
-      return;
-    }
-    const user = await response.json();
-    return user;
+  async getArticles() {
+    const response = await fetch(apiUrl + '/articles');
+    return await response.json();
   }
 
-  // #endregion Public Methods (2)
+  async isConnected() {
+    return await fetch(apiUrl + '/auth/isConnected');
+  }
+
+  async upload(formData: FormData) {
+    return await authFetch(apiUrl + '/upload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      body: formData,
+    });
+  }
 }
 
-const api = new Api();
-
-export default api;
+export const api = new Api();

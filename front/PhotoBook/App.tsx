@@ -1,31 +1,45 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * Generated with the TypeScript template
- * https://github.com/react-native-community/react-native-template-typescript
- *
- * @format
- */
-
 import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React, {useEffect, useState} from 'react';
-import {StatusBar, StyleSheet} from 'react-native';
-import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
+import {
+  ActivityIndicator,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from 'react-native';
+import {ThemeProvider} from 'react-native-elements';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {Provider} from 'react-redux';
-import api from './src/api';
-import {RootStackParamList} from './src/navigation';
-import { useAppDispatch } from './src/redux/hooks';
-import { connect } from './src/redux/slices/authentication.slice';
+import {api} from './src/api';
+import DeviceInfosModule from './src/native/DeviceInfosModule';
+import {Stack} from './src/navigation';
+import {useAppDispatch, useAppSelector} from './src/redux/hooks';
+import {
+  connect,
+  disconnect,
+  selectAuthentication,
+  User,
+} from './src/redux/slices/authentication.slice';
 import {store} from './src/redux/store';
-import HomeScreen from './src/screens/HomeScreen';
-import LoginScreen from './src/screens/LoginScreen';
-import SplashScreen from './src/screens/SplashScreen';
+import Home from './src/screens/Home';
+import Login from './src/screens/Login';
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
-const dispatch = useAppDispatch();
+const testX = async () => {
+  try {
+    const result = await DeviceInfosModule.getUniqueId('testName');
+    console.log('result: ', result);
+    const result2 = await DeviceInfosModule.getUniqueId('zut');
+    console.log('result2: ', result2);
+  } catch (error) {
+    console.log('error: ', error);
+  }
+};
+
 const App = () => {
+  testX();
   return (
     <Provider store={store}>
       <ReduxApp />
@@ -34,58 +48,69 @@ const App = () => {
 };
 
 const ReduxApp = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  console.log('setIsLoading: ', setIsLoading);
-  console.log('isLoading: ', isLoading);
+  const authentication = useAppSelector(selectAuthentication);
+  const dispatch = useAppDispatch();
+  const [initializing, setInitializing] = useState(true);
+  const isDarkMode = useColorScheme() === 'dark';
+  const backgroundStyle = {
+    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  };
 
   useEffect(() => {
     (async () => {
       try {
-        const user = await api.isConnected();
-        if(!user){
-          
-        }else {
-          dispatch(connect(user));
+        const response = await api.isConnected();
+        if (response.status === 401) {
+          dispatch(disconnect(undefined));
+          return;
         }
-        
-      } catch (error) {
-        console.log('error: ', error);
-        
+        const user: User = await response.json();
+        dispatch(connect(user));
       } finally {
-        setIsLoading(false);
+        setInitializing(false);
       }
     })();
-    
-      
-
-  }, []);
-
+  }, [dispatch]);
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.safeAreaView}>
-        <StatusBar barStyle="light-content" />
-        {isLoading ? (
-          <SplashScreen />
-        ) : (
-          <NavigationContainer>
-            <Stack.Navigator
-              initialRouteName="Home"
-              screenOptions={{
-                headerShown: false,
-              }}>
-              <Stack.Screen name="Home" component={HomeScreen} />
-              <Stack.Screen name="Login" component={LoginScreen} />
-            </Stack.Navigator>
-          </NavigationContainer>
-        )}
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <ThemeProvider>
+      <SafeAreaProvider>
+        <SafeAreaView style={[styles.safeAreaView, backgroundStyle]}>
+          <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+          {initializing ? (
+            <View style={styles.initilizing}>
+              <Text style={styles.logo}>PhotoBook</Text>
+              <ActivityIndicator size="large" />
+            </View>
+          ) : (
+            <NavigationContainer>
+              <Stack.Navigator
+                initialRouteName={authentication.user ? 'Home' : 'Login'}
+                screenOptions={{
+                  headerShown: false,
+                }}>
+                <Stack.Screen name="Home" component={Home} />
+                <Stack.Screen name="Login" component={Login} />
+              </Stack.Navigator>
+            </NavigationContainer>
+          )}
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </ThemeProvider>
   );
 };
 
 const styles = StyleSheet.create({
-  safeAreaView: {
+  safeAreaView: {flex: 1},
+  initilizing: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logo: {
+    height: 100,
+    textAlign: 'center',
+    fontSize: 50,
+    fontWeight: 'bold',
   },
 });
 
